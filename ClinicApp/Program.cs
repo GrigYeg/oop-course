@@ -6,27 +6,20 @@ class Program
 {
     static void Main(string[] args)
     {
-        DoctorManager doctorManager = new DoctorManager();
+        Appointment a1 = new Appointment(1, 1, new DateTime(2026, 9, 25, 10, 0, 0));
+        Appointment a2 = new Appointment(2, 2, new DateTime(2026, 9, 25, 11, 0, 0), 45);
+        Appointment a3 = new Appointment(3, 3, new DateTime(2026, 9, 26, 9, 0, 0), 20);
+
+        Console.WriteLine(a1.ToString());
+        Console.WriteLine(a2.ToString());
+        Console.WriteLine(a3.ToString());
+
+        Console.WriteLine("\n// Після Cancel та Complete:");
         
-        DoctorsMenu(doctorManager);
-    }
+        a1.Cancel("Пацієнт не зміг прийти");
+        a2.Complete();
 
-    static void DoctorsMenu(DoctorManager manager)
-    {
-        Doctor d1 = new Doctor("Олег", "Сидоренко", "Кардіологія", "LIC-001", "0441234567");
-        d1.WorkStartHour = 8;
-        d1.WorkEndHour = 16;
-        manager.Add(d1);
-
-        Doctor d2 = new Doctor("Наталія", "Мороз", "Неврологія", "LIC-002", "0442345678");
-        d2.WorkStartHour = 9;
-        d2.WorkEndHour = 18;
-        manager.Add(d2);
-
-        Doctor d3 = new Doctor("Андрій", "Власенко", "Педіатрія", "LIC-003", "0443456789");
-        manager.Add(d3);
-
-        manager.DisplayAll();
-        manager.DisplayStats();
+        Console.WriteLine(a1.ToString());
+        Console.WriteLine(a2.ToString());
     }
 }
