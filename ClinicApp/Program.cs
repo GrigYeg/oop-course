@@ -6,16 +6,18 @@ class Program
 {
     static void Main(string[] args)
     {
-        Patient p1 = new Patient("Іван", "Петренко", new DateTime(1985, 5, 12), "A+", "0501234567");
-        Patient p2 = new Patient("Олена", "Коваль", new DateTime(1993, 8, 24), "B-", "0672345678");
-        Patient p3 = new Patient("Максим", "Бойко", new DateTime(2010, 2, 15), "O+", "0933456789");
-        Patient p4 = new Patient();
-        Patient p5 = new Patient("Марія", "Ткач");
+        Doctor d1 = new Doctor("Олег", "Сидоренко", "Кардіологія", "LIC-001", "0441234567");
+        d1.WorkStartHour = 8;
+        d1.WorkEndHour = 16;
 
-        Console.WriteLine(p1.ToString());
-        Console.WriteLine(p2.ToString());
-        Console.WriteLine(p3.ToString());
-        Console.WriteLine(p4.ToString());
-        Console.WriteLine(p5.ToString());
+        Doctor d2 = new Doctor("Наталія", "Мороз", "Неврологія", "LIC-002", "0442345678");
+        d2.WorkStartHour = 9;
+        d2.WorkEndHour = 18;
+
+        Doctor d3 = new Doctor("Андрій", "Власенко", "Педіатрія", "LIC-003", "0443456789");
+
+        Console.WriteLine(d1.ToString());
+        Console.WriteLine(d2.ToString());
+        Console.WriteLine(d3.ToString());
     }
 }
