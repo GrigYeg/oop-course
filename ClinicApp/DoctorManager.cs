@@ -34,31 +34,20 @@ public class DoctorManager
         return null;
     }
 
-    public Doctor[] FindBySpeciality(string speciality)
+    public Doctor[] FindBySpeciality(Speciality speciality)
     {
-        string lowerQuery = speciality.ToLower();
         int matchCount = 0;
-
         for (int i = 0; i < _count; i++)
         {
-            if (_doctors[i].Speciality.ToLower().Contains(lowerQuery))
-            {
-                matchCount++;
-            }
+            if (_doctors[i].Speciality == speciality) matchCount++;
         }
 
         Doctor[] results = new Doctor[matchCount];
-        int resultIndex = 0;
-
+        int index = 0;
         for (int i = 0; i < _count; i++)
         {
-            if (_doctors[i].Speciality.ToLower().Contains(lowerQuery))
-            {
-                results[resultIndex] = _doctors[i];
-                resultIndex++;
-            }
+            if (_doctors[i].Speciality == speciality) results[index++] = _doctors[i];
         }
-
         return results;
     }
 

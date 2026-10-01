@@ -1,43 +1,66 @@
 ﻿using System;
 
-namespace ClinicApp;
-
-class Program
+namespace ClinicApp
 {
-    static void Main(string[] args)
+    class Program
     {
-        GrowablePatientManager manager = new GrowablePatientManager();
-
-        Console.WriteLine("=== Тест GrowablePatientManager ===");
-        Console.WriteLine("Додаємо пацієнтів одного за одним...");
-
-        for (int i = 1; i <= 20; i++)
+        static void Main(string[] args)
         {
-            Patient p = new Patient($"Тест", $"Пацієнт{i}");
-            manager.Add(p);
+            Clinic clinic = new Clinic("Моя Клініка");
+
+            Console.WriteLine("=== 1. Перевірка початкових даних (Enum) ===");
             
-            if (i <= 9 || i == 20) 
+            clinic.Patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 12), BloodType.APositive, "0501234567"));
+            clinic.Patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 24), BloodType.BNegative, "0672345678"));
+            
+            clinic.Doctors.Add(new Doctor("Олег", "Сидоренко", Speciality.Cardiology, "LIC-001", "0441234567"));
+            clinic.Doctors.Add(new Doctor("Наталія", "Мороз", Speciality.Neurology, "LIC-002", "0442345678"));
+            clinic.Doctors.Add(new Doctor("Андрій", "Шевченко", Speciality.Cardiology, "LIC-003", "0443456789"));
+
+            Console.WriteLine($"Успішно додано пацієнтів: {clinic.Patients.Count}");
+            Console.WriteLine($"Успішно додано лікарів: {clinic.Doctors.Count}\n");
+            
+            Console.WriteLine("=== 2. Пошук лікаря за спеціальністю ===");
+            Doctor[] cardiologists = clinic.Doctors.FindBySpeciality(Speciality.Cardiology);
+            
+            Console.WriteLine($"Знайдено кардіологів: {cardiologists.Length}");
+            foreach (var doc in cardiologists)
             {
-                Console.WriteLine($"Додано [{i}]. Розмір: {manager.Count} / {manager.Capacity}");
+                Console.WriteLine($"- {doc.FirstName} {doc.LastName}");
             }
-            else if (i == 10)
+            Console.WriteLine();
+            
+            Console.WriteLine("=== 3. Тест GrowablePatientManager ===");
+            Console.WriteLine("Додаємо пацієнтів одного за одним...");
+
+            GrowablePatientManager manager = new GrowablePatientManager();
+
+            for (int i = 1; i <= 20; i++)
             {
-                Console.WriteLine("...");
+                Patient p = new Patient($"Тест", $"Пацієнт{i}");
+                manager.Add(p);
+
+                if (i <= 9 || i == 20)
+                {
+                    Console.WriteLine($"Додано [{i}]. Розмір: {manager.Count} / {manager.Capacity}");
+                }
+                else if (i == 10)
+                {
+                    Console.WriteLine("...");
+                }
+            }
+
+            Console.WriteLine("\nТест пошуку:");
+            Patient? p10 = manager.FindById(10);
+            
+            if (p10 != null) 
+            {
+                Console.WriteLine($"FindById(10) -> {p10.FullName}");
+            }
+            else
+            {
+                Console.WriteLine("FindById(10) -> Пацієнта не знайдено");
             }
         }
-
-        Console.WriteLine("\nТест пошуку:");
-        
-        Patient? p10 = manager.FindById(10);
-        if (p10 != null) Console.WriteLine($"FindById(10) -> {p10.FullName}");
-        else Console.WriteLine("FindById(10) -> не знайдено");
-
-        Patient? p99 = manager.FindById(99);
-        if (p99 != null) Console.WriteLine($"FindById(99) -> {p99.FullName}");
-        else Console.WriteLine("FindById(99) -> не знайдено");
-
-        Console.WriteLine("\nПорівняння:");
-        Console.WriteLine($"PatientManager:         100 місць (фіксовано)");
-        Console.WriteLine($"GrowablePatientManager: {manager.Capacity} місця (зросте при потребі)");
     }
 }
