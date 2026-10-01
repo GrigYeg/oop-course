@@ -50,6 +50,29 @@ public class DoctorManager
         }
         return results;
     }
+    
+    public Doctor[] FindBySpeciality(string query)
+    {
+        int matchCount = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (ClinicFormatter.FormatSpeciality(_doctors[i].Speciality).Contains(query, StringComparison.OrdinalIgnoreCase)) matchCount++;
+        }
+
+        Doctor[] results = new Doctor[matchCount];
+        int index = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (ClinicFormatter.FormatSpeciality(_doctors[i].Speciality).Contains(query, StringComparison.OrdinalIgnoreCase)) results[index++] = _doctors[i];
+        }
+        return results;
+    }
+    
+    public bool TryFindById(int id, out Doctor? doctor)
+    {
+        doctor = FindById(id);
+        return doctor != null;
+    }
 
     public Doctor[] GetAll()
     {

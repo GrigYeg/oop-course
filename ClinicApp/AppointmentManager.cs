@@ -125,6 +125,11 @@ public class AppointmentManager
         }
         return results;
     }
+    
+    public Appointment[] GetByDate(int year, int month, int day)
+    {
+        return GetByDate(new DateTime(year, month, day));
+    }
 
     public Appointment[] GetUpcoming()
     {
