@@ -139,4 +139,12 @@ public class PatientManager
         Console.WriteLine($"Дорослих:    {adultCount} з {_count}");
         Console.WriteLine(new string('=', 30));
     }
+    public Patient? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) return null;
+            return _patients[index];
+        }
+    }
 }
