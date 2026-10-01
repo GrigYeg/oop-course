@@ -34,32 +34,44 @@ public class DoctorManager
         return null;
     }
 
-    public Doctor[] FindBySpeciality(string speciality)
+    public Doctor[] FindBySpeciality(Speciality speciality)
     {
-        string lowerQuery = speciality.ToLower();
         int matchCount = 0;
-
         for (int i = 0; i < _count; i++)
         {
-            if (_doctors[i].Speciality.ToLower().Contains(lowerQuery))
-            {
-                matchCount++;
-            }
+            if (_doctors[i].Speciality == speciality) matchCount++;
         }
 
         Doctor[] results = new Doctor[matchCount];
-        int resultIndex = 0;
-
+        int index = 0;
         for (int i = 0; i < _count; i++)
         {
-            if (_doctors[i].Speciality.ToLower().Contains(lowerQuery))
-            {
-                results[resultIndex] = _doctors[i];
-                resultIndex++;
-            }
+            if (_doctors[i].Speciality == speciality) results[index++] = _doctors[i];
+        }
+        return results;
+    }
+    
+    public Doctor[] FindBySpeciality(string query)
+    {
+        int matchCount = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (ClinicFormatter.FormatSpeciality(_doctors[i].Speciality).Contains(query, StringComparison.OrdinalIgnoreCase)) matchCount++;
         }
 
+        Doctor[] results = new Doctor[matchCount];
+        int index = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (ClinicFormatter.FormatSpeciality(_doctors[i].Speciality).Contains(query, StringComparison.OrdinalIgnoreCase)) results[index++] = _doctors[i];
+        }
         return results;
+    }
+    
+    public bool TryFindById(int id, out Doctor? doctor)
+    {
+        doctor = FindById(id);
+        return doctor != null;
     }
 
     public Doctor[] GetAll()
@@ -157,5 +169,14 @@ public class DoctorManager
             }
         }
         Console.WriteLine(new string('=', 30));
+    }
+    
+    public Doctor? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) return null;
+            return _doctors[index];
+        }
     }
 }

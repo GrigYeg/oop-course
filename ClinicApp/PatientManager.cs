@@ -34,7 +34,12 @@ public class PatientManager
         }
         return null;
     }
-
+    public bool TryFindById(int id, out Patient? patient)
+    {
+        patient = FindById(id);
+        return patient != null;
+    }
+    
     public Patient[] FindByName(string query)
     {
         string lowerQuery = query.ToLower();
@@ -62,6 +67,23 @@ public class PatientManager
             }
         }
 
+        return results;
+    }
+    
+    public Patient[] FindByBloodType(BloodType bloodType)
+    {
+        int matchCount = 0;
+        for (int i = 0; i < Count; i++)
+        {
+            if (_patients[i].BloodType == bloodType) matchCount++;
+        }
+
+        Patient[] results = new Patient[matchCount];
+        int index = 0;
+        for (int i = 0; i < Count; i++)
+        {
+            if (_patients[i].BloodType == bloodType) results[index++] = _patients[i];
+        }
         return results;
     }
 
@@ -138,5 +160,13 @@ public class PatientManager
         Console.WriteLine($"Найстарший:  {_patients[maxIdx].FullName} ({_patients[maxIdx].Age} р.)");
         Console.WriteLine($"Дорослих:    {adultCount} з {_count}");
         Console.WriteLine(new string('=', 30));
+    }
+    public Patient? this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _count) return null;
+            return _patients[index];
+        }
     }
 }

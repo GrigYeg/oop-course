@@ -11,11 +11,11 @@ public class Appointment
     public int DoctorId { get; }
     public DateTime ScheduledAt { get; }
     public int DurationMinutes { get; }
-    public string Status { get; private set; }
+    public AppointmentStatus Status { get; private set; }
     public string Notes { get; private set; }
 
     public DateTime EndsAt => ScheduledAt.AddMinutes(DurationMinutes);
-    public bool IsUpcoming => ScheduledAt > DateTime.Now && Status == "Scheduled";
+    public bool IsUpcoming => ScheduledAt > DateTime.Now && Status == AppointmentStatus.Scheduled;
 
     public Appointment(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30)
     {
@@ -24,27 +24,22 @@ public class Appointment
         DoctorId = doctorId;
         ScheduledAt = scheduledAt;
         DurationMinutes = durationMinutes;
-        Status = "Scheduled";
+        Status = AppointmentStatus.Scheduled;
         Notes = "";
     }
 
     public bool Cancel(string reason = "")
     {
-        if (Status != "Scheduled") return false;
-        
-        Status = "Cancelled";
-        if (reason.Length > 0)
-        {
-            Notes = reason;
-        }
+        if (Status != AppointmentStatus.Scheduled) return false;
+        Status = AppointmentStatus.Cancelled;
+        if (reason.Length > 0) Notes = reason;
         return true;
     }
 
     public bool Complete()
     {
-        if (Status != "Scheduled") return false;
-        
-        Status = "Completed";
+        if (Status != AppointmentStatus.Scheduled) return false;
+        Status = AppointmentStatus.Completed;
         return true;
     }
 
