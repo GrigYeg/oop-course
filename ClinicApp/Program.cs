@@ -1,6 +1,8 @@
 ﻿using System;
-
-namespace ClinicApp;
+using ClinicApp;
+using ClinicApp.Models;
+using ClinicApp.Enums;
+using ClinicApp.Managers;
 
 class Program
 {
