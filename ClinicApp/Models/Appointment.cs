@@ -11,8 +11,15 @@ public class Appointment
     public int PatientId { get; }
     public int DoctorId { get; }
     public DateTime ScheduledAt { get; }
-    public int DurationMinutes { get; }
-    public AppointmentStatus Status { get; private set; }
+    
+    private int _durationMinutes;
+    public int DurationMinutes
+    {
+        get => _durationMinutes;
+        set => _durationMinutes = value;
+    }
+    
+    public AppointmentStatus Status { get; set; }
     public string Notes { get; private set; }
 
     public DateTime EndsAt => ScheduledAt.AddMinutes(DurationMinutes);

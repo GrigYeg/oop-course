@@ -8,11 +8,37 @@ public class Patient
     private static int _nextId = 1;
 
     public int Id { get; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public DateTime DateOfBirth { get; set; }
+
+    private string _firstName = "";
+    public string FirstName
+    {
+        get => _firstName;
+        set => _firstName = value;
+    }
+
+    private string _lastName = "";
+    public string LastName
+    {
+        get => _lastName;
+        set => _lastName = value;
+    }
+
+    private DateTime _dateOfBirth;
+    public DateTime DateOfBirth
+    {
+        get => _dateOfBirth;
+        set => _dateOfBirth = value;
+    }
+
     public BloodType BloodType { get; private set; }
-    public string Phone { get; set; }
+
+    private string _phone = "";
+    public string Phone
+    {
+        get => _phone;
+        set => _phone = value;
+    }
+
     public string Email { get; set; } = "";
 
     public string FullName => $"{FirstName} {LastName}";
