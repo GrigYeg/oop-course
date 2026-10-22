@@ -148,6 +148,16 @@ public class AppointmentManager
         }
         return results;
     }
+    
+    public Appointment[] GetAll()
+    {
+        Appointment[] copy = new Appointment[_count];
+        for (int i = 0; i < _count; i++)
+        {
+            copy[i] = _appointments[i];
+        }
+        return copy;
+    }
 
     public void DisplayAppointment(Appointment a)
     {
