@@ -6,6 +6,7 @@ namespace ClinicApp.Models;
 
 public class Appointment : IPayable, ICancellable
 {
+    protected readonly decimal _priceMultiplier;
     private static int _nextId = 1;
 
     public int Id { get; }
@@ -32,8 +33,14 @@ public class Appointment : IPayable, ICancellable
     
     public bool IsCancelled => Status == AppointmentStatus.Cancelled;
     public string CancellationReason => IsCancelled ? Notes : "";
+    
+    /* Відповідь до Задачі 5:
+       Обрано Варіант Б (коефіцієнт у конструкторі підкласу).
+       Чому не нові підкласи: створення підкласів для кожної комбінації (VIP-терміновий, Дитячий-звичайний) призведе до комбінаторного вибуху кількості класів. До того ж, клас SpecialistAppointment є sealed, від нього не можна успадкуватись.
+       Чому Варіант Б: це класичний приклад принципу Open/Closed (відкритий для розширення, закритий для змін). Ми використовуємо композицію параметрів замість успадкування. Кожен підклас тепер сам контролює свою базову націнку через параметр конструктора, а знижка просто множиться на неї при створенні об'єкта.
+    */
 
-    public Appointment(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30)
+    public Appointment(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30, decimal priceMultiplier = 1m)
     {
         PatientId = patientId;
         DoctorId = doctorId;
@@ -42,6 +49,17 @@ public class Appointment : IPayable, ICancellable
         Status = AppointmentStatus.Scheduled;
         Notes = "";
         Id = _nextId++;
+        _priceMultiplier = priceMultiplier;
+    }
+    
+    public virtual string GetDescription()
+    {
+        return "Прийом";
+    }
+
+    public int GetPriority()
+    {
+        return 3;
     }
 
     public bool Cancel(string reason = "")
@@ -61,9 +79,9 @@ public class Appointment : IPayable, ICancellable
     
     public bool IsPaid { get; private set; }
 
-    public decimal GetCost()
+    public virtual decimal GetCost()
     {
-        return DurationMinutes * 10m;
+        return (DurationMinutes * 10m) * _priceMultiplier;
     }
 
     public void MarkPaid()
@@ -77,13 +95,13 @@ public class Appointment : IPayable, ICancellable
 
     public override string ToString()
     {
-        string baseInfo = $"[{Id}] Пацієнт #{PatientId} | Лікар #{DoctorId} | {ScheduledAt:dd.MM.yyyy HH:mm}-{EndsAt:HH:mm} | {Status}";
-        
+        string baseInfo = $"[{Id}] {GetDescription()} | Пацієнт #{PatientId} -> Лікар #{DoctorId} | {ScheduledAt:dd.MM.yyyy HH:mm}-{EndsAt:HH:mm} | {Status} | {GetCost():F2} грн";
+
         if (Notes.Length > 0)
         {
             return $"{baseInfo} | {Notes}";
         }
-        
+
         return baseInfo;
     }
 }
