@@ -167,6 +167,57 @@ public class AppointmentManager
         return results;
     }
     
+    public Appointment[] GetUrgent()
+    {
+        int matchCount = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_appointments[i] is UrgentAppointment) matchCount++;
+        }
+
+        Appointment[] results = new Appointment[matchCount];
+        int index = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_appointments[i] is UrgentAppointment) results[index++] = _appointments[i];
+        }
+        return results;
+    }
+
+    public Appointment[] GetSpecialist()
+    {
+        int matchCount = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_appointments[i] is SpecialistAppointment) matchCount++;
+        }
+
+        Appointment[] results = new Appointment[matchCount];
+        int index = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_appointments[i] is SpecialistAppointment) results[index++] = _appointments[i];
+        }
+        return results;
+    }
+
+    public Appointment[] GetRegular()
+    {
+        int matchCount = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_appointments[i] is RegularAppointment) matchCount++;
+        }
+
+        Appointment[] results = new Appointment[matchCount];
+        int index = 0;
+        for (int i = 0; i < _count; i++)
+        {
+            if (_appointments[i] is RegularAppointment) results[index++] = _appointments[i];
+        }
+        return results;
+    }
+    
     public Appointment[] GetAll()
     {
         Appointment[] copy = new Appointment[_count];
@@ -185,8 +236,8 @@ public class AppointmentManager
         Doctor? doctor = _doctors.FindById(a.DoctorId);
         string doctorName = doctor != null ? doctor.FullName : $"Лікар #{a.DoctorId}";
 
-        string baseInfo = $"[{a.Id}] {patientName} -> {doctorName} | {a.ScheduledAt:dd.MM.yyyy HH:mm}-{a.EndsAt:HH:mm} | {a.Status}";
-        
+        string baseInfo = $"[{a.Id}] {a.GetDescription()} | {patientName} -> {doctorName} | {a.ScheduledAt:dd.MM.yyyy HH:mm}-{a.EndsAt:HH:mm} | {a.Status} | {a.GetCost():F2} грн";
+
         if (a.Notes.Length > 0)
         {
             Console.WriteLine($"{baseInfo} | {a.Notes}");
