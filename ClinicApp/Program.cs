@@ -37,8 +37,26 @@ class Program
         clinic.MedicalRecords.Add(new Diagnosis(3, 2, DateTime.Today.AddDays(-2), "J00", "Гострий назофарингіт", false));
 
         clinic.Appointments.Book(1, 1, DateTime.Today.AddDays(1).AddHours(10), 30);
-        clinic.Appointments.Book(1, 1, DateTime.Today.AddDays(1).AddHours(11), 45);
-        clinic.Appointments.Book(1, 1, DateTime.Today.AddDays(1).AddHours(12), 20);
+        clinic.Appointments.BookUrgent(1, 1, DateTime.Today.AddDays(1).AddHours(11), "біль у грудях", 45);
+        clinic.Appointments.BookSpecialist(1, 1, DateTime.Today.AddDays(1).AddHours(12), "кардіологія", 20);
+
+        Console.WriteLine("\n== new vs override ==");
+        UrgentAppointment urgentApp = new UrgentAppointment(1, 1, DateTime.Today, "тест");
+        Appointment baseApp = urgentApp;
+
+        Console.WriteLine($"Через Appointment:      {baseApp.GetDescription()} | пріоритет {baseApp.GetPriority()}");
+        Console.WriteLine($"Через UrgentAppointment: {urgentApp.GetDescription()} | пріоритет {urgentApp.GetPriority()}");
+
+        /* Відповіді на запитання Задачі 3:
+           1. Чому GetDescription() через змінну типу Appointment дає опис термінового прийому?
+              Тому що метод GetDescription() є віртуальним (virtual/override). Викликається реалізація, яка відповідає фактичному типу об'єкта в пам'яті (UrgentAppointment), незалежно від типу змінної-посилання.
+
+           2. Чому GetPriority() через ту саму змінну повертає 3, хоча об'єкт — UrgentAppointment?
+              Тому що GetPriority() прихований (модифікатор new), а не перевизначений. Для невіртуальних методів компілятор жорстко прив'язує виклик до типу змінної (Appointment), а не до типу самого об'єкта.
+
+           3. Що треба змінити в Appointment і UrgentAppointment, щоб GetPriority() теж працював поліморфно?
+              У класі Appointment додати ключове слово virtual до методу GetPriority(). У класі UrgentAppointment змінити модифікатор new на override для методу GetPriority().
+        */
 
         Appointment[] apps = clinic.Appointments.GetAll();
         if (apps.Length > 0)

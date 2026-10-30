@@ -28,20 +28,20 @@ public class AppointmentManager
         }
         return null;
     }
-
-    public bool Book(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30)
+    
+    private bool AddAppointment(Appointment appointment)
     {
-        Patient? patient = _patients.FindById(patientId);
+        Patient? patient = _patients.FindById(appointment.PatientId);
         if (patient == null)
         {
-            Console.WriteLine($"Помилка: пацієнта з ID {patientId} не знайдено.");
+            Console.WriteLine($"Помилка: пацієнта з ID {appointment.PatientId} не знайдено.");
             return false;
         }
 
-        Doctor? doctor = _doctors.FindById(doctorId);
+        Doctor? doctor = _doctors.FindById(appointment.DoctorId);
         if (doctor == null)
         {
-            Console.WriteLine($"Помилка: лікаря з ID {doctorId} не знайдено.");
+            Console.WriteLine($"Помилка: лікаря з ID {appointment.DoctorId} не знайдено.");
             return false;
         }
 
@@ -51,10 +51,27 @@ public class AppointmentManager
             return false;
         }
 
-        Appointment newApp = new Appointment(patientId, doctorId, scheduledAt, durationMinutes);
-        _appointments[_count++] = newApp;
-        Console.WriteLine($"Запис [{newApp.Id}] створено: {patient.FullName} -> {doctor.FullName} о {scheduledAt:dd.MM.yyyy HH:mm}");
+        _appointments[_count++] = appointment;
+        Console.WriteLine($"Запис [{appointment.Id}] створено: {patient.FullName} -> {doctor.FullName} о {appointment.ScheduledAt:dd.MM.yyyy HH:mm}");
         return true;
+    }
+    
+    public bool Book(int patientId, int doctorId, DateTime scheduledAt, int durationMinutes = 30)
+    {
+        RegularAppointment newApp = new RegularAppointment(patientId, doctorId, scheduledAt, durationMinutes);
+        return AddAppointment(newApp);
+    }
+
+    public bool BookUrgent(int patientId, int doctorId, DateTime scheduledAt, string urgencyNote = "", int durationMinutes = 30)
+    {
+        UrgentAppointment newApp = new UrgentAppointment(patientId, doctorId, scheduledAt, urgencyNote, durationMinutes);
+        return AddAppointment(newApp);
+    }
+
+    public bool BookSpecialist(int patientId, int doctorId, DateTime scheduledAt, string topic = "", int durationMinutes = 45)
+    {
+        SpecialistAppointment newApp = new SpecialistAppointment(patientId, doctorId, scheduledAt, topic, durationMinutes);
+        return AddAppointment(newApp);
     }
 
     public bool Cancel(int id, string reason = "")
