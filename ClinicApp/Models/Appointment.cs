@@ -4,7 +4,7 @@ using ClinicApp.Interfaces;
 
 namespace ClinicApp.Models;
 
-public class Appointment : IPayable, ICancellable
+public class Appointment : IPayable, ICancellable, IIdentifiable
 {
     protected readonly decimal _priceMultiplier;
     private static int _nextId = 1;
