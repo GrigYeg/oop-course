@@ -5,6 +5,7 @@ using System.Threading;
 using ClinicApp.Enums;
 using ClinicApp.Models;
 using ClinicApp.Interfaces;
+using ClinicApp.Comparators;
 
 namespace ClinicApp;
 
@@ -76,6 +77,7 @@ class Program
             Console.WriteLine("║ 5. Рахунки       — оплата, борги             ║");
 			Console.WriteLine("║ 6. Черга         — очікування, прийом        ║");
             Console.WriteLine("║ 7. Звіт          — загальна статистика       ║");
+            Console.WriteLine("║ 8. Аналітика     — рейтинги                  ║");
             Console.WriteLine("║ 0. Вийти                                     ║");
             Console.WriteLine("╚══════════════════════════════════════════════╝");
             Console.Write("Оберіть розділ: ");
@@ -92,6 +94,7 @@ class Program
                 case "5": BillingMenu(clinic); break;
                 case "6": WaitingRoomMenu(clinic); break;
 				case "7": clinic.GenerateReport(); break;
+                case "8": AnalyticsMenu(clinic); break;
             }
         }
     }
@@ -443,6 +446,74 @@ static void WaitingRoomMenu(Clinic clinic)
                 default:
                     Console.WriteLine("Невідомий пункт меню.");
                     break;
+            }
+        }
+    }
+    
+    static List<ClinicApp.Models.DoctorStats> CollectDoctorStats(Clinic clinic)
+    {
+        var list = new List<ClinicApp.Models.DoctorStats>();
+        foreach (var stat in clinic.Analytics.ComputeDoctorStats())
+        {
+            list.Add(stat);
+        }
+        return list;
+    }
+
+    static List<ClinicApp.Models.PatientStats> CollectPatientStats(Clinic clinic)
+    {
+        var list = new List<ClinicApp.Models.PatientStats>();
+        foreach (var stat in clinic.Analytics.ComputePatientStats())
+        {
+            list.Add(stat);
+        }
+        return list;
+    }
+    static void AnalyticsMenu(Clinic clinic)
+    {
+        while (true)
+        {
+            Console.WriteLine("\n--- Аналітика -------------------------");
+            Console.WriteLine("1. Лікарі за навантаженням");
+            Console.WriteLine("2. Лікарі за виручкою");
+            Console.WriteLine("3. Лікарі за іменем");
+            Console.WriteLine("4. Пацієнти за кількістю візитів");
+            Console.WriteLine("5. Пацієнти за витратами");
+            Console.WriteLine("0. Назад");
+            Console.Write("Оберіть пункт: ");
+            string choice = Console.ReadLine() ?? "";
+
+            if (choice == "0") break;
+
+            if (choice == "1" || choice == "2" || choice == "3")
+            {
+                var docList = CollectDoctorStats(clinic);
+                
+                if (choice == "1")
+                    docList.Sort(); // Природний порядок (IComparable)
+                else if (choice == "2")
+                    docList.Sort(new DoctorStatsByRevenue());
+                else if (choice == "3")
+                    docList.Sort(new DoctorStatsByName());
+
+                for (int i = 0; i < docList.Count; i++)
+                {
+                    Console.WriteLine(docList[i]);
+                }
+            }
+            else if (choice == "4" || choice == "5")
+            {
+                var patList = CollectPatientStats(clinic);
+
+                if (choice == "4")
+                    patList.Sort(); // Природний порядок (IComparable)
+                else if (choice == "5")
+                    patList.Sort(new PatientStatsBySpent());
+
+                for (int i = 0; i < patList.Count; i++)
+                {
+                    Console.WriteLine(patList[i]);
+                }
             }
         }
     }
