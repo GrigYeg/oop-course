@@ -859,6 +859,7 @@ static void WaitingRoomMenu(Clinic clinic)
             Console.WriteLine("\n--- Файли -------------------------");
             Console.WriteLine("1. Останні рядки лога");
             Console.WriteLine("2. Очистити лог");
+            Console.WriteLine("3. Експортувати всі звіти");
             Console.WriteLine("0. Назад");
             Console.Write("Оберіть: ");
 
@@ -894,6 +895,17 @@ static void WaitingRoomMenu(Clinic clinic)
                 {
                     clinic.Logger.Clear();
                     Console.WriteLine("Лог очищено.");
+                    break;
+                }
+                case "3":
+                {
+                    string[] paths = clinic.Exporter.ExportAll();
+                    Console.WriteLine("Звіти збережено:");
+                    for (int i = 0; i < paths.Length; i++)
+                    {
+                        Console.WriteLine($"  {paths[i]}");
+                    }
+                    clinic.Logger.LogInfo($"Експортовано {paths.Length} звітів");
                     break;
                 }
                 default:
