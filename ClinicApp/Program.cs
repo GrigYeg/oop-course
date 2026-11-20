@@ -65,6 +65,18 @@ class Program
         {
             apps[0].Cancel();
         }
+        
+        if (clinic.Session.Exists())
+        {
+            Console.Write("Знайдено збережену сесію. Завантажити? (y/n): ");
+            string? answer = Console.ReadLine()?.Trim().ToLower();
+            if (answer == "y")
+            {
+                int loaded = clinic.Session.Load(clinic);
+                Console.WriteLine($"Завантажено {loaded} пацієнтів.");
+                clinic.Logger.LogInfo($"Завантажено сесію: додано {loaded} пацієнтів");
+            }
+        }
 
         while (true)
         {
@@ -86,7 +98,18 @@ class Program
             Console.Write("Оберіть розділ: ");
 
             string? choice = Console.ReadLine()?.Trim();
-            if (choice == "0") break;
+            if (choice == "0")
+            {
+                Console.Write("Зберегти сесію? (y/n): ");
+                string? saveAnswer = Console.ReadLine()?.Trim().ToLower();
+                if (saveAnswer == "y")
+                {
+                    clinic.Session.Save(clinic);
+                    Console.WriteLine("Сесію збережено.");
+                    clinic.Logger.LogInfo("Сесію збережено");
+                }
+                break;
+            }
 
             switch (choice)
             {
