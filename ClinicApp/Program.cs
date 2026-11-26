@@ -7,6 +7,7 @@ using ClinicApp.Utils;
 using ClinicApp.Models;
 using ClinicApp.Interfaces;
 using ClinicApp.Comparators;
+using ClinicApp.Events;
 
 namespace ClinicApp;
 
@@ -20,6 +21,7 @@ class Program
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
         Clinic clinic = new Clinic("Моя Клініка");
+        clinic.Appointments.AppointmentBooked += OnAppointmentBookedConsole;
 
         clinic.Patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 12), BloodType.APositive, "0501234567"));
         clinic.Patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 24), BloodType.BNegative, "0672345678"));
@@ -476,7 +478,7 @@ class Program
         }
     }
 
-static void WaitingRoomMenu(Clinic clinic)
+    static void WaitingRoomMenu(Clinic clinic)
     {
         while (true)
         {
@@ -670,6 +672,7 @@ static void WaitingRoomMenu(Clinic clinic)
         }
         return list;
     }
+    
     static void AnalyticsMenu(Clinic clinic)
     {
         while (true)
@@ -718,6 +721,7 @@ static void WaitingRoomMenu(Clinic clinic)
             }
         }
     }
+    
     static void TreatmentPlansMenu(Clinic clinic)
     {
         while (true)
@@ -875,6 +879,7 @@ static void WaitingRoomMenu(Clinic clinic)
             }
         }
     }
+    
     static void FilesMenu(Clinic clinic)
     {
         while (true)
@@ -949,6 +954,11 @@ static void WaitingRoomMenu(Clinic clinic)
             }
         }
     }
+    
+    static void OnAppointmentBookedConsole(object? sender, AppointmentEventArgs e) =>
+        Console.WriteLine($"[EVENT] Запис #{e.AppointmentId} створено: пацієнт #{e.PatientId} → лікар #{e.DoctorId}, {e.ScheduledAt:dd.MM.yyyy HH:mm}");
+    
+    
     static bool TryReadIds(Clinic clinic, out int patientId, out int doctorId)
     {
         patientId = 0;
