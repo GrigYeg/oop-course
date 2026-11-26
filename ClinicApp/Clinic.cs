@@ -19,6 +19,8 @@ public class Clinic
     public ClinicLogger Logger { get; }
     public ClinicExporter Exporter { get; }
     public SessionManager Session { get; }
+    public PatientPassportWriter Passport { get; }
+    public SessionEventTracker Tracker { get; }
 
     public Clinic(string name)
     {
@@ -34,6 +36,9 @@ public class Clinic
         Logger = new ClinicLogger();
         Exporter = new ClinicExporter(this);
         Session = new SessionManager();
+        Passport = new PatientPassportWriter(this);
+        Tracker = new SessionEventTracker(this);
+        SubscribeEvents();
     }
 
     public void DisplaySchedule(DateTime date)
@@ -41,6 +46,29 @@ public class Clinic
         Console.WriteLine($"\n=== Розклад на {date:dd.MM.yyyy} ===");
         Appointment[] dailyAppointments = Appointments.GetByDate(date);
         Appointments.DisplayList(dailyAppointments);
+    }
+    
+    private void SubscribeEvents()
+    {
+        Appointments.AppointmentBooked += Logger.OnAppointmentBooked;
+        Appointments.AppointmentCancelled += Logger.OnAppointmentCancelled;
+        Appointments.AppointmentCompleted += Logger.OnAppointmentCompleted;
+        Appointments.UrgentAppointmentBooked += Logger.OnUrgentAppointmentBooked;
+        Patients.PatientAdded += Logger.OnPatientAdded;
+        Billing.PaymentReceived += Logger.OnPaymentReceived;
+        TreatmentPlans.PlanCompleted += Logger.OnPlanCompleted;
+
+        Patients.PatientAdded += Passport.OnPatientAdded;
+        Appointments.AppointmentCompleted += Passport.OnAppointmentCompleted;
+        TreatmentPlans.PlanCompleted += Passport.OnPlanCompleted;
+
+        Patients.PatientAdded += Tracker.OnPatientAdded;
+        Appointments.AppointmentBooked += Tracker.OnAppointmentBooked;
+        Appointments.UrgentAppointmentBooked += Tracker.OnUrgentAppointmentBooked;
+        Appointments.AppointmentCancelled += Tracker.OnAppointmentCancelled;
+        Appointments.AppointmentCompleted += Tracker.OnAppointmentCompleted;
+        Billing.PaymentReceived += Tracker.OnPaymentReceived;
+        TreatmentPlans.PlanCompleted += Tracker.OnPlanCompleted;
     }
 
     public void GenerateReport()

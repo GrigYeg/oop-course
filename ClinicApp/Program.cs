@@ -7,6 +7,7 @@ using ClinicApp.Utils;
 using ClinicApp.Models;
 using ClinicApp.Interfaces;
 using ClinicApp.Comparators;
+using ClinicApp.Events;
 
 namespace ClinicApp;
 
@@ -20,6 +21,7 @@ class Program
         CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
         Clinic clinic = new Clinic("Моя Клініка");
+        clinic.Appointments.AppointmentBooked += OnAppointmentBookedConsole;
 
         clinic.Patients.Add(new Patient("Іван", "Петренко", new DateTime(1985, 5, 12), BloodType.APositive, "0501234567"));
         clinic.Patients.Add(new Patient("Олена", "Коваль", new DateTime(1993, 8, 24), BloodType.BNegative, "0672345678"));
@@ -63,7 +65,7 @@ class Program
         Appointment[] apps = clinic.Appointments.GetAll();
         if (apps.Length > 0)
         {
-            apps[0].Cancel();
+            clinic.Appointments.Cancel(apps[0].Id);
         }
         
         if (clinic.Session.Exists())
@@ -100,6 +102,9 @@ class Program
             string? choice = Console.ReadLine()?.Trim();
             if (choice == "0")
             {
+                clinic.Tracker.PrintSummary();
+                clinic.Tracker.SaveSummary();
+
                 Console.Write("Зберегти сесію? (y/n): ");
                 string? saveAnswer = Console.ReadLine()?.Trim().ToLower();
                 if (saveAnswer == "y")
@@ -167,7 +172,6 @@ class Program
 
                     Patient patient = new Patient(firstName, lastName, birthDate, bloodType, phone);
                     clinic.Patients.Add(patient);
-                    clinic.Logger.LogInfo($"Додано пацієнта #{patient.Id}: {patient.FullName}");
                 }
                 catch (Exception ex)
                 {
@@ -305,14 +309,7 @@ class Program
                     Console.Write("Тривалість (хв): ");
                     int duration = int.Parse(Console.ReadLine() ?? "");
 
-                    int countBefore = clinic.Appointments.GetAll().Length;
                     clinic.Appointments.Book(patId, docId, scheduledAt, duration);
-                    Appointment[] allAfter = clinic.Appointments.GetAll();
-                    if (allAfter.Length > countBefore)
-                    {
-                        Appointment created = allAfter[allAfter.Length - 1];
-                        clinic.Logger.LogInfo($"Запис #{created.Id} створено: пацієнт #{created.PatientId} -> лікар #{created.DoctorId}");
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -325,21 +322,9 @@ class Program
                 Console.Write("ID запису для завершення: ");
                 if (!int.TryParse(Console.ReadLine(), out int appId)) continue;
 
-                Appointment? target = null;
-                Appointment[] allApps = clinic.Appointments.GetAll();
-                for (int i = 0; i < allApps.Length; i++)
-                {
-                    if (allApps[i].Id == appId)
-                    {
-                        target = allApps[i];
-                        break;
-                    }
-                }
-
-                if (target != null && target.Complete())
+                if (clinic.Appointments.Complete(appId))
                 {
                     Console.WriteLine($"Запис [{appId}] завершено.");
-                    clinic.Logger.LogInfo($"Запис #{appId} завершено");
                 }
                 else
                 {
@@ -354,21 +339,9 @@ class Program
                 Console.Write("Причина (Enter — без причини): ");
                 string reason = Console.ReadLine() ?? "";
 
-                Appointment? target = null;
-                Appointment[] allApps = clinic.Appointments.GetAll();
-                for (int i = 0; i < allApps.Length; i++)
-                {
-                    if (allApps[i].Id == appId)
-                    {
-                        target = allApps[i];
-                        break;
-                    }
-                }
-
-                if (target != null && target.Cancel(reason))
+                if (clinic.Appointments.Cancel(appId, reason))
                 {
                     Console.WriteLine($"Запис [{appId}] скасовано.");
-                    clinic.Logger.LogInfo($"Запис #{appId} скасовано");
                 }
                 else
                 {
@@ -384,13 +357,10 @@ class Program
                 string reason = Console.ReadLine() ?? "";
 
                 Appointment[] patApps = clinic.Appointments.GetByPatient(patId);
-                int canceled = ClinicApp.Managers.AppointmentManager.CancelAll(patApps, reason);
+                int canceled = clinic.Appointments.CancelAll(patApps, reason);
+                Console.WriteLine($"Скасовано записів: {canceled}");
 
                 Console.WriteLine($"Скасовано записів: {canceled}");
-                if (canceled > 0)
-                {
-                    clinic.Logger.LogInfo($"Скасовано {canceled} записів пацієнта #{patId}");
-                }
             }
             else if (choice == "9")
             {
@@ -462,7 +432,6 @@ class Program
                     if (clinic.Billing.PayAppointment(aId))
                     {
                         Console.WriteLine($"Запис [{aId}] оплачено.");
-                        clinic.Logger.LogInfo($"Оплачено запис #{aId}");
                     }
                     else
                     {
@@ -476,7 +445,7 @@ class Program
         }
     }
 
-static void WaitingRoomMenu(Clinic clinic)
+    static void WaitingRoomMenu(Clinic clinic)
     {
         while (true)
         {
@@ -670,6 +639,7 @@ static void WaitingRoomMenu(Clinic clinic)
         }
         return list;
     }
+    
     static void AnalyticsMenu(Clinic clinic)
     {
         while (true)
@@ -718,6 +688,7 @@ static void WaitingRoomMenu(Clinic clinic)
             }
         }
     }
+    
     static void TreatmentPlansMenu(Clinic clinic)
     {
         while (true)
@@ -828,7 +799,7 @@ static void WaitingRoomMenu(Clinic clinic)
                     {
                         Console.WriteLine("План не знайдено.");
                     }
-                    else if (plan.Complete())
+                    else if (clinic.TreatmentPlans.Complete(planId))
                     {
                         Console.WriteLine($"План [{plan.Id}] завершено.");
                     }
@@ -875,6 +846,7 @@ static void WaitingRoomMenu(Clinic clinic)
             }
         }
     }
+    
     static void FilesMenu(Clinic clinic)
     {
         while (true)
@@ -949,6 +921,11 @@ static void WaitingRoomMenu(Clinic clinic)
             }
         }
     }
+    
+    static void OnAppointmentBookedConsole(object? sender, AppointmentEventArgs e) =>
+        Console.WriteLine($"[EVENT] Запис #{e.AppointmentId} створено: пацієнт #{e.PatientId} → лікар #{e.DoctorId}, {e.ScheduledAt:dd.MM.yyyy HH:mm}");
+    
+    
     static bool TryReadIds(Clinic clinic, out int patientId, out int doctorId)
     {
         patientId = 0;
