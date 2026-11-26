@@ -34,6 +34,7 @@ public class Clinic
         Logger = new ClinicLogger();
         Exporter = new ClinicExporter(this);
         Session = new SessionManager();
+        SubscribeEvents();
     }
 
     public void DisplaySchedule(DateTime date)
@@ -41,6 +42,17 @@ public class Clinic
         Console.WriteLine($"\n=== Розклад на {date:dd.MM.yyyy} ===");
         Appointment[] dailyAppointments = Appointments.GetByDate(date);
         Appointments.DisplayList(dailyAppointments);
+    }
+    
+    private void SubscribeEvents()
+    {
+        Appointments.AppointmentBooked += Logger.OnAppointmentBooked;
+        Appointments.AppointmentCancelled += Logger.OnAppointmentCancelled;
+        Appointments.AppointmentCompleted += Logger.OnAppointmentCompleted;
+        Appointments.UrgentAppointmentBooked += Logger.OnUrgentAppointmentBooked;
+        Patients.PatientAdded += Logger.OnPatientAdded;
+        Billing.PaymentReceived += Logger.OnPaymentReceived;
+        TreatmentPlans.PlanCompleted += Logger.OnPlanCompleted;
     }
 
     public void GenerateReport()
