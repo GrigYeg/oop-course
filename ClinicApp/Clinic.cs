@@ -21,6 +21,7 @@ public class Clinic
     public SessionManager Session { get; }
     public PatientPassportWriter Passport { get; }
     public SessionEventTracker Tracker { get; }
+    public ReportManager Reports { get; }
 
     public Clinic(string name)
     {
@@ -38,6 +39,7 @@ public class Clinic
         Session = new SessionManager();
         Passport = new PatientPassportWriter(this);
         Tracker = new SessionEventTracker(this);
+        Reports = new ReportManager(Appointments, Doctors, Patients);
         SubscribeEvents();
     }
 
